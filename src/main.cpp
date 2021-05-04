@@ -1,15 +1,26 @@
 #include "cgmath.h"		// slee's simple math library
+
 #include "cgut.h"		// slee's OpenGL utility
 #include "trackball.h"	// virtual trackball
 #include "circle.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 //*************************************
 // global constants
 static const char*	window_name = "cgbase - trackball";
 static const char*	vert_shader_path = "../bin/shaders/trackball.vert";
 static const char*	frag_shader_path = "../bin/shaders/trackball.frag";
+
 static const char*	sun_texture = "../bin/textures/sun.jpg";
+static const char*	mercury_texture = "../bin/textures/mercury.jpg";
+static const char*	venus_texture = "../bin/textures/venus.jpg";
 static const char*	earth_texture = "../bin/textures/earth.jpg";
+static const char*	mars_texture = "../bin/textures/mars.jpg";
+static const char*	jupiter_texture = "../bin/textures/jupiter.jpg";
+static const char*	saturn_texture = "../bin/textures/saturn.jpg";
+static const char*	neptune_texture = "../bin/textures/neptune.jpg";
+static const char*	uranus_texture = "../bin/textures/uranus.jpg";
 uint				NUM_TESS = 72;
 uint				NUM_SPHERES = 9;
 //*************************************
@@ -24,7 +35,7 @@ struct camera
 	float	fovy = PI/4.0f; // must be in radian
 	float	aspect;
 	float	dnear = 1.0f;
-	float	dfar = 1000.0f;
+	float	dfar = 10000.0f;
 	mat4	projection_matrix;
 };
 
@@ -37,6 +48,15 @@ ivec2		window_size = cg_default_window_size(); // initial window size
 // OpenGL objects
 GLuint	program	= 0;	// ID holder for GPU program
 GLuint	vertex_array = 0;	// ID holder for vertex array object
+GLuint	SUN = 0;
+GLuint	MERCURY = 0;
+GLuint	VENUS = 0;
+GLuint	EARTH = 0;
+GLuint	MARS = 0;
+GLuint	JUPITER = 0;
+GLuint	SATURN = 0;
+GLuint	NEPTUNE = 0;
+GLuint	URANUS = 0;
 
 //*************************************
 // global variables
@@ -49,12 +69,33 @@ GLint	tc_xy = 0;
 float theta = 0.0f;
 float t0 = 0.0f;
 auto	spheres = std::move(create_spheres(NUM_SPHERES));
+uint	mode = 0;
+//*************************************
+// light objects
+
+struct light_t {
+	vec4 position = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	vec4 ambient = vec4(0.2f, 0.2f, 0.2f, 1.0f);
+	vec4 diffuse = vec4(0.8f, 0.8f, 0.8f, 1.0f);
+	vec4 specular = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+};
+
+struct material_t
+{
+	vec4	ambient = vec4(0.2f, 0.2f, 0.2f, 1.0f);
+	vec4	diffuse = vec4(0.8f, 0.8f, 0.8f, 1.0f);
+	vec4	specular = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	float	shininess = 100.0f;
+};
+
 //*************************************
 // scene objects
 
 camera		cam;
 trackball	tb;
 std::vector<vertex>	solar_system;	// host-side vertices
+light_t		light;
+material_t	material;
 
 //*************************************
 void update()
@@ -66,7 +107,7 @@ void update()
 	// build the model matrix for oscillating scale
 	float t = float(glfwGetTime());
 	float scale	= 1.0f+float(cos(t*1.5f))*5.0f;
-	mat4 model_matrix;
+	//mat4 model_matrix;
 
 	// update uniform variables in vertex/fragment shaders
 	GLint uloc;
@@ -74,7 +115,19 @@ void update()
 	uloc = glGetUniformLocation(program, "tc_xy");	if (uloc > -1) glUniform1i(uloc, tc_xy);
 	uloc = glGetUniformLocation( program, "view_matrix" );			if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, cam.view_matrix );
 	uloc = glGetUniformLocation( program, "projection_matrix" );	if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, cam.projection_matrix );
-	uloc = glGetUniformLocation( program, "model_matrix" );			if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, model_matrix );
+	//uloc = glGetUniformLocation( program, "model_matrix" );			if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, model_matrix );
+
+	glUniform4fv(glGetUniformLocation(program, "light_position"), 1, light.position);
+	glUniform4fv(glGetUniformLocation(program, "Ia"), 1, light.ambient);
+	glUniform4fv(glGetUniformLocation(program, "Id"), 1, light.diffuse);
+	glUniform4fv(glGetUniformLocation(program, "Is"), 1, light.specular);
+
+	// setup material properties
+	glUniform4fv(glGetUniformLocation(program, "Ka"), 1, material.ambient);
+	glUniform4fv(glGetUniformLocation(program, "Kd"), 1, material.diffuse);
+	glUniform4fv(glGetUniformLocation(program, "Ks"), 1, material.specular);
+	glUniform1f(glGetUniformLocation(program, "shininess"), material.shininess);
+	
 }
 
 void render()
@@ -88,13 +141,51 @@ void render()
 	// bind vertex array object
 	glBindVertexArray(vertex_array);
 	
-	
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, SUN);
+	glUniform1i(glGetUniformLocation(program, "SUN"), 0);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, MERCURY);
+	glUniform1i(glGetUniformLocation(program, "MERCURY"), 1);
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, VENUS);
+	glUniform1i(glGetUniformLocation(program, "VENUS"), 2);
+
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, EARTH);
+	glUniform1i(glGetUniformLocation(program, "EARTH"), 3);
+
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, MARS);
+	glUniform1i(glGetUniformLocation(program, "MARS"), 4);
+
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_2D, JUPITER);
+	glUniform1i(glGetUniformLocation(program, "JUPITER"), 5);
+
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_2D, SATURN);
+	glUniform1i(glGetUniformLocation(program, "SATURN"), 6);
+
+	glActiveTexture(GL_TEXTURE7);
+	glBindTexture(GL_TEXTURE_2D, NEPTUNE);
+	glUniform1i(glGetUniformLocation(program, "NEPTUNE"), 7);
+
+	glActiveTexture(GL_TEXTURE8);
+	glBindTexture(GL_TEXTURE_2D, URANUS);
+	glUniform1i(glGetUniformLocation(program, "URANUS"), 8);
+
+
 	for (auto& s : spheres) {
 		float t = (float)glfwGetTime();
 		float delta_time = t - t0;
 		s.update(t);
 		theta += delta_time * 0.5f;
 		t0 = t;
+		mode = s.id;
+		glUniform1i(glGetUniformLocation(program, "mode"), mode);
 		glUniformMatrix4fv(glGetUniformLocation(program, "model_matrix"), 1, GL_TRUE, s.model_matrix);
 		glDrawElements(GL_TRIANGLES, NUM_TESS * (NUM_TESS) * 3 , GL_UNSIGNED_INT, nullptr);
 	}
@@ -212,7 +303,7 @@ void update_vertex_buffer(const std::vector<vertex>& vertices, uint N)
 		uint k1, k2;
 		for (uint k = 0; k <= N; k++)
 		{
-			k1 = k * (N+1);      // k1 -- k1+1
+			k1 = k * (N+1);  // k1 -- k1+1
 							 // |	/		
 			k2 = k1 + N + 1; // k2 -- k2+1   
 
@@ -270,6 +361,7 @@ void update_vertex_buffer(const std::vector<vertex>& vertices, uint N)
 
 
 	// generation of vertex buffer: use triangle_vertices instead of vertices
+		
 		glGenBuffers(1, &vertex_buffer);
 		glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(vertex) * v.size(), &v[0], GL_STATIC_DRAW);
@@ -284,10 +376,7 @@ void update_vertex_buffer(const std::vector<vertex>& vertices, uint N)
 std::vector<vertex> create_circle_vertices(uint N)
 {
 	std::vector<vertex> v = { { vec3(0,0,0), vec3(0,0,-1.0f), vec2(0.5f) } }; // origin
-	//float r = circles[0].radius;
-	float	r = 30.f;
-	//printf("radius of circle 0: %lf\n", r);
-
+	
 	for (uint k = 0; k <= N/2 ; k++)
 	{
 		float t = PI * 2.0f * k / float(N), cost = cos(t), sint = sin(t);
@@ -300,6 +389,40 @@ std::vector<vertex> create_circle_vertices(uint N)
 	return v;
 }
 
+GLuint create_texture(const char* image_path, bool mipmap = true, GLenum wrap = GL_CLAMP_TO_EDGE, GLenum filter = GL_LINEAR)
+{
+	// load image
+	image* i = cg_load_image(image_path); if (!i) return 0; // return null texture; 0 is reserved as a null texture
+	int		w = i->width, h = i->height, c = i->channels;
+
+	// induce internal format and format from image
+	GLint	internal_format = c == 1 ? GL_R8 : c == 2 ? GL_RG8 : c == 3 ? GL_RGB8 : GL_RGBA8;
+	GLenum	format = c == 1 ? GL_RED : c == 2 ? GL_RG : c == 3 ? GL_RGB : GL_RGBA;
+
+	// create a src texture (lena texture)
+	GLuint texture;
+	glGenTextures(1, &texture); if (texture == 0) { printf("%s(): failed in glGenTextures()\n", __func__); return 0; }
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, internal_format, w, h, 0, format, GL_UNSIGNED_BYTE, i->ptr);
+	if (i) { delete i; i = nullptr; } // release image
+
+	// build mipmap
+	if (mipmap)
+	{
+		int mip_levels = 0; for (int k = w > h ? w : h; k; k >>= 1) mip_levels++;
+		for (int l = 1; l < mip_levels; l++)
+			glTexImage2D(GL_TEXTURE_2D, l, internal_format, (w >> l) == 0 ? 1 : (w >> l), (h >> l) == 0 ? 1 : (h >> l), 0, format, GL_UNSIGNED_BYTE, nullptr);
+		if (glGenerateMipmap) glGenerateMipmap(GL_TEXTURE_2D);
+	}
+
+	// set up texture parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, !mipmap ? filter : filter == GL_LINEAR ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_NEAREST);
+
+	return texture;
+}
 
 bool user_init()
 {
@@ -310,11 +433,35 @@ bool user_init()
 	glClearColor( 39/255.0f, 40/255.0f, 34/255.0f, 1.0f );	// set clear color
 	glEnable( GL_CULL_FACE );								// turn on backface culling
 	glEnable( GL_DEPTH_TEST );								// turn on depth tests
+	glEnable(GL_TEXTURE_2D);			// enable texturing
+	glActiveTexture(GL_TEXTURE0);		// notify GL the current texture slot is 0
 
 	// load the mesh
-	
+	/*vertex corners[4];
+	corners[0].pos = vec3(-1.0f, -1.0f, 0.0f);	corners[0].tex = vec2(0.0f, 0.0f);
+	corners[1].pos = vec3(+1.0f, -1.0f, 0.0f);	corners[1].tex = vec2(1.0f, 0.0f);
+	corners[2].pos = vec3(+1.0f, +1.0f, 0.0f);	corners[2].tex = vec2(1.0f, 1.0f);
+	corners[3].pos = vec3(-1.0f, +1.0f, 0.0f);	corners[3].tex = vec2(0.0f, 1.0f);
+	vertex vertices[6] = { corners[0], corners[1], corners[2], corners[0], corners[2], corners[3] };
+
+	GLuint vertex_buffer;
+	glGenBuffers(1, &vertex_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);*/
+
+
+
 	solar_system = std::move(create_circle_vertices(NUM_TESS));
-	
+	SUN = create_texture(sun_texture, true); if (!SUN) return false;
+	MERCURY = create_texture(mercury_texture, true); if (!MERCURY) return false;
+	VENUS = create_texture(venus_texture, true); if (!VENUS) return false;
+	EARTH = create_texture(earth_texture, true); if (!EARTH) return false;
+	MARS = create_texture(mars_texture, true); if (!MARS) return false;
+	JUPITER = create_texture(jupiter_texture, true); if (!JUPITER) return false;
+	SATURN = create_texture(saturn_texture, true); if (!SATURN) return false;
+	NEPTUNE = create_texture(neptune_texture, true); if (!NEPTUNE) return false;
+	URANUS = create_texture(uranus_texture, true); if (!URANUS) return false;
+
 	// create vertex buffer; called again when index buffering mode is toggled
 	update_vertex_buffer(solar_system, NUM_TESS);
 	

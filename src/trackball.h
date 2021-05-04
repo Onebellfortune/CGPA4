@@ -14,7 +14,7 @@ struct trackball
 	trackball( float rot_scale=1.0f ) : scale(rot_scale){}
 	bool is_tracking() const { return b_tracking; }
 	void begin( const mat4& view_matrix, vec2 m );
-	void end() { printf("end\n"); b_tracking = false; }
+	void end() {  b_tracking = false; }
 	mat4 update( vec2 m ) const;
 	mat4 update_zoom(vec2 m) const;
 	mat4 update_pan(vec2 m) const;
@@ -22,7 +22,7 @@ struct trackball
 
 inline void trackball::begin( const mat4& view_matrix, vec2 m )
 {
-	printf("begin\n");
+	//printf("begin\n");
 	b_tracking = true;			// enable trackball tracking
 	m0 = m;						// save current mouse position
 	view_matrix0 = view_matrix;	// save current view matrix
@@ -30,7 +30,7 @@ inline void trackball::begin( const mat4& view_matrix, vec2 m )
 
 inline mat4 trackball::update( vec2 m ) const
 {
-	printf("update\n");
+	//printf("update\n");
 	// project a 2D mouse position to a unit sphere
 	static const vec3 p0 = vec3(0,0,1.0f);	// reference position on sphere
 	vec3 p1 = vec3(m-m0,0);					// displacement
@@ -55,7 +55,7 @@ inline mat4 trackball::update( vec2 m ) const
 
 inline mat4 trackball::update_zoom(vec2 m) const
 {
-	printf("update_zoom\n");
+	//printf("update_zoom\n");
 	// project a 2D mouse position to a unit sphere
 	static const vec3 p0 = vec3(0, 0, 1.0f);	// reference position on sphere
 	vec3 p1 = vec3(m - m0, 0);					// displacement
@@ -89,13 +89,13 @@ inline mat4 trackball::update_zoom(vec2 m) const
 		view_matrix0._11, view_matrix0._12, view_matrix0._13, 
 		view_matrix0._21, view_matrix0._22, view_matrix0._23,
 		view_matrix0._31, view_matrix0._32, view_matrix0._33);*/
-	printf("% lf % lf % lf\n",view_matrix0._14, view_matrix0._24, view_matrix0._34);
+	//printf("% lf % lf % lf\n",view_matrix0._14, view_matrix0._24, view_matrix0._34);
 	return rebuild;
 }
 
 inline mat4 trackball::update_pan(vec2 m) const
 {
-	printf("update_pan\n");
+	//printf("update_pan\n");
 	// project a 2D mouse position to a unit sphere
 	static const vec3 p0 = vec3(0, 0, 1.0f);	// reference position on sphere
 	vec3 p1 = vec3(m - m0, 0);					// displacement

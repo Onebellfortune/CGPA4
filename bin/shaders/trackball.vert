@@ -10,6 +10,7 @@ uniform mat4 projection_matrix;
 
 out vec2 tc;
 out vec3 norm;
+out vec4 epos;
 
 void main()
 {
