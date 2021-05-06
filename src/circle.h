@@ -40,71 +40,73 @@ inline void sphere_t::update( float t)
 	float position_y;
 	switch (id) {
 	case 0:
-		radius = 30.f;
+		radius = 3.f;
 		rotation = 0.15f;
 		orbit_radius = 0.003f;
 		position_x = 0;
 		position_y = 0;
 		break;
 	case 1:
-		radius = 2.51f;
+		radius = 0.25f;
 		rotation = 0.075f;
 		orbit_radius = 4.00f;
-		position_x = 45;
-		position_y = 30;
+		position_x = 4.5f;
+		position_y = 3.0f;
 		break;
 	case 2:
-		radius = 1.91f;
+		radius = 0.19f;
 		rotation = -0.05f;
 		orbit_radius = 1.33f;
-		position_x = 55;
-		position_y = -20;
+		position_x = 5.5f;
+		position_y = -2.0f;
 		break;
 	case 3:
-		radius = 4.f;
+		radius = 0.4f;
 		rotation = 0.5f;
 		orbit_radius = 1.0f;
-		position_x = 70;
-		position_y = 90;
+		position_x = 7.0f;
+		position_y = 9.0f;
 		break;
 	case 4:
-		radius = 3.f;
+		radius = 0.3f;
 		rotation = .45f;
 		orbit_radius = 0.75f;
-		position_x = 80;
-		position_y = 40;
+		position_x = 8.0f;
+		position_y = 4.0f;
 		break;
 	case 5:
-		radius = 10.f;
+		radius = 1.0f;
 		rotation = 1.5f;
 		orbit_radius = 0.3f;
-		position_x = 100;
-		position_y = 50;
+		position_x = 10.0f;
+		position_y = 5.0f;
 		break;
 	case 6:
-		radius = 7.f;
+		radius = 0.7f;
 		rotation = 1.0f;
 		orbit_radius = 0.2f;
-		position_x = 120;
-		position_y = -40;
+		position_x = 12.0f;
+		position_y = -4.0f;
 		break;
 	case 7:
-		radius =5.f;
+		radius =0.5f;
 		rotation = -0.7f;
 		orbit_radius = 0.01f;
-		position_x = 135;
-		position_y = 20;
+		position_x = 13.5f;
+		position_y = 2.0f;
 		break;
 	case 8:
-		radius = 6.f;
+		radius = 3.5f;
 		rotation = 0.7f;
 		orbit_radius = 0.05f;
-		position_x = 165;
-		position_y = -90;
+		position_x = 16.5f;
+		position_y = -9.0f;
 		break;
 	}
 	//float c	= cos(theta), s=sin(theta);
-	model_matrix = mat4::rotate(vec3(0, 0, 1), t*rotation)* mat4::translate(vec3(position_x, position_y, 0))*mat4::scale(vec3(radius,radius,radius));
+	//model_matrix = mat4::translate(vec3(0,5,0))*mat4::scale(vec3(radius, radius, radius));
+	//model_matrix = mat4::rotate(vec3(0, 0, 1), t*rotation)* mat4::translate(vec3(position_x, position_y, 0))*mat4::scale(vec3(radius,radius,radius));
+	model_matrix = mat4::translate(vec3(position_x, position_y, 0)) * mat4::scale(vec3(radius, radius, radius));
 	// these transformations will be explained in later transformation lecture
 	/*mat4 scale_matrix =
 	{

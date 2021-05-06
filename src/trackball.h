@@ -110,8 +110,8 @@ inline mat4 trackball::update_pan(vec2 m) const
 	vec3 v = mat3(view_matrix0).transpose() * p0.cross(p1);
 	float theta = asin(std::min(v.length(), 1.0f));
 	mat4 rebuild = view_matrix0;
-	rebuild._14 += p1.x * 150.0f;
-	rebuild._24 += p1.y * 150.0f;
+	rebuild._14 += p1.x * 15.0f;
+	rebuild._24 += p1.y * 15.0f;
 	// resulting view matrix, which first applies
 	// trackball rotation in the world space
 	return rebuild;
