@@ -54,38 +54,38 @@ void main()
 	vec3 h = normalize(l+v);	// the halfway vector
 
 	//vec4 iKd;
-	vec4 iKd_mercury=texture(MERCURY,tc);
-	vec4 iKd_venus=texture(VENUS,tc);
-	vec4 iKd_earth=texture(EARTH,tc);
-	vec4 iKd_mars=texture(MARS,tc);
-	vec4 iKd_jupiter=texture(JUPITER,tc);
-	vec4 iKd_saturn=texture(SATURN,tc);
-	vec4 iKd_neptune=texture(NEPTUNE,tc);
-	vec4 iKd_uranus=texture(URANUS,tc);
 	if(mode==0){
 		fragColor=texture(SUN,tc);
 	}else if(mode==1){
+		vec4 iKd_mercury=texture(MERCURY,tc);
 		fragColor=phong(l,n,h,iKd_mercury);
 		//fragColor=texture(MERCURY,tc);
 	}else if(mode==2){
+		vec4 iKd_venus=texture(VENUS,tc);
 		fragColor=phong(l,n,h,iKd_venus);
 		//fragColor=texture(VENUS,tc);
 	}else if(mode==3){
+		vec4 iKd_earth=texture(EARTH,tc);
 		fragColor=phong(l,n,h,iKd_earth);
 		//fragColor=texture(EARTH,tc);
 	}else if(mode==4){
+		vec4 iKd_mars=texture(MARS,tc);
 		fragColor=phong(l,n,h,iKd_mars);
 		//fragColor=texture(MARS,tc);
 	}else if(mode==5){
+		vec4 iKd_jupiter=texture(JUPITER,tc);
 		fragColor=phong(l,n,h,iKd_jupiter);
 		//fragColor=texture(JUPITER,tc);
 	}else if(mode==6){
+		vec4 iKd_saturn=texture(SATURN,tc);
 		fragColor=phong(l,n,h,iKd_saturn);
 		//fragColor=texture(SATURN,tc);
 	}else if(mode==7){
+		vec4 iKd_neptune=texture(NEPTUNE,tc);
 		fragColor=phong(l,n,h,iKd_neptune);
 		//fragColor=texture(NEPTUNE,tc);
 	}else if(mode==8){
+		vec4 iKd_uranus=texture(URANUS,tc);
 		fragColor=phong(l,n,h,iKd_uranus);
 		//fragColor=texture(URANUS,tc);
 	}else{

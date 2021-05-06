@@ -30,7 +30,7 @@ struct camera
 
 struct light_t
 {
-	vec4	position = vec4( 0.0f, 0.0f, 0.0f, 1.0f );   // directional light
+	vec4	position = vec4( 0.0f, -10.0f, 0.0f, 0.0f );   // directional light
     vec4	ambient  = vec4( 0.2f, 0.2f, 0.2f, 1.0f );
     vec4	diffuse  = vec4( 0.8f, 0.8f, 0.8f, 1.0f );
     vec4	specular = vec4( 1.0f, 1.0f, 1.0f, 1.0f );
@@ -77,7 +77,7 @@ void update()
 	float t = float(glfwGetTime());
 	//float scale	= 1.0f+float(cos(t*1.5f))*0.05f;
 	float scale = 1.0f;
-	mat4 model_matrix = mat4::translate(vec3(50,0,0))*mat4::scale( scale, scale, scale );
+	mat4 model_matrix = mat4::translate(vec3(30,0,0))*mat4::scale( scale, scale, scale );
 
 	// update uniform variables in vertex/fragment shaders
 	GLint uloc;

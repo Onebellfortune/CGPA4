@@ -27,7 +27,7 @@ uint				NUM_SPHERES = 9;
 // common structures
 struct camera
 {
-	vec3	eye = vec3( 30, 0, 0 );
+	vec3	eye = vec3( 300, 0, 0 );
 	vec3	at = vec3( 0, 0, 0 );
 	vec3	up = vec3( 0, 0, 1 );
 	mat4	view_matrix = mat4::look_at( eye, at, up );
@@ -35,7 +35,7 @@ struct camera
 	float	fovy = PI/4.0f; // must be in radian
 	float	aspect;
 	float	dnear = 1.0f;
-	float	dfar = 1000.0f;
+	float	dfar = 10000.0f;
 	mat4	projection_matrix;
 };
 
@@ -76,16 +76,16 @@ uint	mode = 0;
 struct light_t {
 	vec4 position = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	vec4 ambient = vec4(0.2f, 0.2f, 0.2f, 1.0f);
-	vec4 diffuse = vec4(0.9f, 0.9f, 0.9f, 1.0f);
+	vec4 diffuse = vec4(0.8f, 0.8f, 0.8f, 1.0f);
 	vec4 specular = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 };
 
 struct material_t
 {
 	vec4	ambient = vec4(0.2f, 0.2f, 0.2f, 1.0f);
-	vec4	diffuse = vec4(0.9f, 0.9f, 0.9f, 1.0f);
+	vec4	diffuse = vec4(0.8f, 0.8f, 0.8f, 1.0f);
 	vec4	specular = vec4(1.0f, 1.0f, 1.0f, 1.0f);
-	float	shininess = 32.0f;
+	float	shininess = 100.0f;
 };
 
 //*************************************
@@ -121,7 +121,6 @@ void update()
 	glUniform4fv(glGetUniformLocation(program, "Ia"), 1, light.ambient);
 	glUniform4fv(glGetUniformLocation(program, "Id"), 1, light.diffuse);
 	glUniform4fv(glGetUniformLocation(program, "Is"), 1, light.specular);
-	
 
 	// setup material properties
 	glUniform4fv(glGetUniformLocation(program, "Ka"), 1, material.ambient);
@@ -436,14 +435,6 @@ bool user_init()
 	glEnable( GL_DEPTH_TEST );								// turn on depth tests
 	glEnable(GL_TEXTURE_2D);			// enable texturing
 	glActiveTexture(GL_TEXTURE0);		// notify GL the current texture slot is 0
-	glActiveTexture(GL_TEXTURE1);
-	glActiveTexture(GL_TEXTURE2);
-	glActiveTexture(GL_TEXTURE3);
-	glActiveTexture(GL_TEXTURE4);
-	glActiveTexture(GL_TEXTURE5);
-	glActiveTexture(GL_TEXTURE6);
-	glActiveTexture(GL_TEXTURE7);
-	glActiveTexture(GL_TEXTURE8);
 
 	// load the mesh
 	/*vertex corners[4];
