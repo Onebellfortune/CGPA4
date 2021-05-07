@@ -1,10 +1,10 @@
 #include "cgmath.h"		// slee's simple math library
-
+#define STB_IMAGE_IMPLEMENTATION
 #include "cgut.h"		// slee's OpenGL utility
 #include "trackball.h"	// virtual trackball
 #include "circle.h"
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+
+
 
 //*************************************
 // global constants
@@ -27,7 +27,7 @@ uint				NUM_SPHERES = 9;
 // common structures
 struct camera
 {
-	vec3	eye = vec3( 300, 0, 0 );
+	vec3	eye = vec3( 30, -100, 0 );
 	vec3	at = vec3( 0, 0, 0 );
 	vec3	up = vec3( 0, 0, 1 );
 	mat4	view_matrix = mat4::look_at( eye, at, up );
@@ -35,7 +35,7 @@ struct camera
 	float	fovy = PI/4.0f; // must be in radian
 	float	aspect;
 	float	dnear = 1.0f;
-	float	dfar = 10000.0f;
+	float	dfar = 1000.0f;
 	mat4	projection_matrix;
 };
 
@@ -51,7 +51,7 @@ GLuint	vertex_array = 0;	// ID holder for vertex array object
 GLuint	SUN = 0;
 GLuint	MERCURY = 0;
 GLuint	VENUS = 0;
-GLuint	EARTH = 0;
+GLuint	EARTH;
 GLuint	MARS = 0;
 GLuint	JUPITER = 0;
 GLuint	SATURN = 0;
@@ -70,6 +70,7 @@ float theta = 0.0f;
 float t0 = 0.0f;
 auto	spheres = std::move(create_spheres(NUM_SPHERES));
 uint	mode = 0;
+uint	k = 0;
 //*************************************
 // light objects
 
@@ -106,16 +107,33 @@ void update()
 
 	// build the model matrix for oscillating scale
 	float t = float(glfwGetTime());
-	float scale	= 1.0f+float(cos(t*1.5f))*5.0f;
-	//mat4 model_matrix;
+	//float scale	= 1.0f+float(cos(t*1.5f))*5.0f;
+	//float scale = -1.0f;
+	//float scale = 5.0f + float(cos(t * 1.5f)) * 0.5f;
+	float scale = 10.0f + float(cos(t * 1.5f)) * 0.5f;
+	mat4 model_matrix = mat4::rotate(vec3(0, 0, 1), t) * mat4::translate(50, 0, 0) * mat4::scale(scale, scale, scale);
 
+	//mat4 model_matrix = mat4::scale(scale, scale, scale);
+	
 	// update uniform variables in vertex/fragment shaders
 	GLint uloc;
-	uloc = glGetUniformLocation(program, "b_solid_color");	if (uloc > -1) glUniform1i(uloc, b_solid_color);
-	uloc = glGetUniformLocation(program, "tc_xy");	if (uloc > -1) glUniform1i(uloc, tc_xy);
-	uloc = glGetUniformLocation( program, "view_matrix" );			if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, cam.view_matrix );
-	uloc = glGetUniformLocation( program, "projection_matrix" );	if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, cam.projection_matrix );
-	//uloc = glGetUniformLocation( program, "model_matrix" );			if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, model_matrix );
+	//uloc = glGetUniformLocation(program, "b_solid_color");	if (uloc > -1) glUniform1i(uloc, b_solid_color);
+	//uloc = glGetUniformLocation(program, "tc_xy");	if (uloc > -1) glUniform1i(uloc, tc_xy);
+	uloc = glGetUniformLocation(program, "view_matrix");			if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, cam.view_matrix);
+	uloc = glGetUniformLocation(program, "projection_matrix");	if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, cam.projection_matrix);
+	uloc = glGetUniformLocation(program, "model_matrix");			if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, model_matrix);
+	//spheres[3].update(t);
+	//mode = spheres[3].id;
+	//model_matrix = mat4::rotate(vec3(0, 0, 1), t * spheres[3].rotation) * mat4::translate(vec3(spheres[3].position_x, spheres[3].position_y, 0)) * mat4::scale(vec3(spheres[3].radius, spheres[3].radius, spheres[3].radius));
+	
+	/*for (auto& s : spheres) {
+		s.update(t);
+		mode = s.id;
+		model_matrix = mat4::rotate(vec3(0, 0, 1), t*s.rotation) * mat4::translate(vec3(s.position_x, s.position_y, 0)) * mat4::scale(vec3(s.radius, s.radius, s.radius));
+		uloc = glGetUniformLocation(program, "model_matrix");			if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, model_matrix);
+		glUniform1i(glGetUniformLocation(program, "mode"), mode);
+		glUniform1i(glGetUniformLocation(program, "k"), k);
+	}*/
 
 	glUniform4fv(glGetUniformLocation(program, "light_position"), 1, light.position);
 	glUniform4fv(glGetUniformLocation(program, "Ia"), 1, light.ambient);
@@ -127,6 +145,52 @@ void update()
 	glUniform4fv(glGetUniformLocation(program, "Kd"), 1, material.diffuse);
 	glUniform4fv(glGetUniformLocation(program, "Ks"), 1, material.specular);
 	glUniform1f(glGetUniformLocation(program, "shininess"), material.shininess);
+
+	/*glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, SUN);
+	glUniform1i(glGetUniformLocation(program, "SUN"), 0);
+	
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, MERCURY);
+	glUniform1i(glGetUniformLocation(program, "MERCURY"), 1);
+	
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, VENUS);
+	glUniform1i(glGetUniformLocation(program, "VENUS"), 2);*/
+	
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, EARTH);
+	glUniform1i(glGetUniformLocation(program, "EARTH"), 0);
+	glUniform1i(glGetUniformLocation(program, "mode"), mode);
+	glUniform1i(glGetUniformLocation(program, "k"), k);
+
+
+	/*glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, MARS);
+	glUniform1i(glGetUniformLocation(program, "MARS"), 4);
+	
+
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_2D, JUPITER);
+	glUniform1i(glGetUniformLocation(program, "JUPITER"), 5);
+	
+
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_2D, SATURN);
+	glUniform1i(glGetUniformLocation(program, "SATURN"), 6);
+	
+
+	glActiveTexture(GL_TEXTURE7);
+	glBindTexture(GL_TEXTURE_2D, NEPTUNE);
+	glUniform1i(glGetUniformLocation(program, "NEPTUNE"), 7);
+	
+
+	glActiveTexture(GL_TEXTURE8);
+	glBindTexture(GL_TEXTURE_2D, URANUS);
+	glUniform1i(glGetUniformLocation(program, "URANUS"), 8);*/
 	
 }
 
@@ -141,63 +205,24 @@ void render()
 	// bind vertex array object
 	glBindVertexArray(vertex_array);
 	
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, SUN);
-	glUniform1i(glGetUniformLocation(program, "SUN"), 0);
-
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, MERCURY);
-	glUniform1i(glGetUniformLocation(program, "MERCURY"), 1);
-
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, VENUS);
-	glUniform1i(glGetUniformLocation(program, "VENUS"), 2);
-
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, EARTH);
-	glUniform1i(glGetUniformLocation(program, "EARTH"), 3);
-
-	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, MARS);
-	glUniform1i(glGetUniformLocation(program, "MARS"), 4);
-
-	glActiveTexture(GL_TEXTURE5);
-	glBindTexture(GL_TEXTURE_2D, JUPITER);
-	glUniform1i(glGetUniformLocation(program, "JUPITER"), 5);
-
-	glActiveTexture(GL_TEXTURE6);
-	glBindTexture(GL_TEXTURE_2D, SATURN);
-	glUniform1i(glGetUniformLocation(program, "SATURN"), 6);
-
-	glActiveTexture(GL_TEXTURE7);
-	glBindTexture(GL_TEXTURE_2D, NEPTUNE);
-	glUniform1i(glGetUniformLocation(program, "NEPTUNE"), 7);
-
-	glActiveTexture(GL_TEXTURE8);
-	glBindTexture(GL_TEXTURE_2D, URANUS);
-	glUniform1i(glGetUniformLocation(program, "URANUS"), 8);
-
-
-	for (auto& s : spheres) {
+	glDrawElements(GL_TRIANGLES, NUM_TESS * (NUM_TESS) * 3, GL_UNSIGNED_INT, nullptr);
+	/*for (auto& s : spheres) {
 		float t = (float)glfwGetTime();
 		float delta_time = t - t0;
-		s.update(t);
+		//s.update(t);
 		theta += delta_time * 0.5f;
 		t0 = t;
 		mode = s.id;
-		glUniform1i(glGetUniformLocation(program, "mode"), mode);
-		glUniformMatrix4fv(glGetUniformLocation(program, "model_matrix"), 1, GL_TRUE, s.model_matrix);
+
+		
+		
+		//glUniformMatrix4fv(glGetUniformLocation(program, "model_matrix"), 1, GL_TRUE, s.model_matrix);
 		glDrawElements(GL_TRIANGLES, NUM_TESS * (NUM_TESS) * 3 , GL_UNSIGNED_INT, nullptr);
-	}
-	
-	
-	
+	}*/
 	
 		// render vertices: trigger shader programs to process vertex data
 	
-	
-	
-	
+
 	// swap front and back buffers, and display to screen
 	glfwSwapBuffers( window );
 }
@@ -223,9 +248,10 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 {
 	if(action==GLFW_PRESS)
 	{
-		if(key==GLFW_KEY_ESCAPE||key==GLFW_KEY_Q)	glfwSetWindowShouldClose( window, GL_TRUE );
-		else if(key==GLFW_KEY_H||key==GLFW_KEY_F1)	print_help();
-		else if(key==GLFW_KEY_HOME)					cam=camera();
+		if (key == GLFW_KEY_ESCAPE || key == GLFW_KEY_Q)	glfwSetWindowShouldClose(window, GL_TRUE);
+		else if (key == GLFW_KEY_H || key == GLFW_KEY_F1)	print_help();
+		else if (key == GLFW_KEY_HOME)					cam = camera();
+		else if (key == GLFW_KEY_D)					k = (k + 1) % 4;
 	}
 	else if (key == GLFW_KEY_W)
 	{
@@ -341,7 +367,7 @@ void update_vertex_buffer(const std::vector<vertex>& vertices, uint N)
 	{
 		std::vector<vertex> v; // triangle vertices
 		//printf("%lf\n", r);
-		for (uint k = 0; k <= N * N; k++)
+		for (uint k = 0; k <= N * N/2; k++)
 		{
 			v.push_back(vertices.front());	// the origin
 			v.push_back(vertices[k + 1]);
@@ -435,6 +461,14 @@ bool user_init()
 	glEnable( GL_DEPTH_TEST );								// turn on depth tests
 	glEnable(GL_TEXTURE_2D);			// enable texturing
 	glActiveTexture(GL_TEXTURE0);		// notify GL the current texture slot is 0
+	/*glActiveTexture(GL_TEXTURE1);
+	glActiveTexture(GL_TEXTURE2);
+	glActiveTexture(GL_TEXTURE3);
+	glActiveTexture(GL_TEXTURE4);
+	glActiveTexture(GL_TEXTURE5);
+	glActiveTexture(GL_TEXTURE6);
+	glActiveTexture(GL_TEXTURE7);
+	glActiveTexture(GL_TEXTURE8);*/
 
 	// load the mesh
 	/*vertex corners[4];
@@ -452,15 +486,15 @@ bool user_init()
 
 
 	solar_system = std::move(create_circle_vertices(NUM_TESS));
-	SUN = create_texture(sun_texture, true); if (!SUN) return false;
+	/*SUN = create_texture(sun_texture, true); if (!SUN) return false;
 	MERCURY = create_texture(mercury_texture, true); if (!MERCURY) return false;
-	VENUS = create_texture(venus_texture, true); if (!VENUS) return false;
+	VENUS = create_texture(venus_texture, true); if (!VENUS) return false;*/
 	EARTH = create_texture(earth_texture, true); if (!EARTH) return false;
-	MARS = create_texture(mars_texture, true); if (!MARS) return false;
+	/*MARS = create_texture(mars_texture, true); if (!MARS) return false;
 	JUPITER = create_texture(jupiter_texture, true); if (!JUPITER) return false;
 	SATURN = create_texture(saturn_texture, true); if (!SATURN) return false;
 	NEPTUNE = create_texture(neptune_texture, true); if (!NEPTUNE) return false;
-	URANUS = create_texture(uranus_texture, true); if (!URANUS) return false;
+	URANUS = create_texture(uranus_texture, true); if (!URANUS) return false;*/
 
 	// create vertex buffer; called again when index buffering mode is toggled
 	update_vertex_buffer(solar_system, NUM_TESS);

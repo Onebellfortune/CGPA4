@@ -30,7 +30,7 @@ struct camera
 
 struct light_t
 {
-	vec4	position = vec4( 0.0f, -10.0f, 0.0f, 0.0f );   // directional light
+	vec4	position = vec4( 0.0f, -50.0f, 30.0f, 1.0f );   // directional light
     vec4	ambient  = vec4( 0.2f, 0.2f, 0.2f, 1.0f );
     vec4	diffuse  = vec4( 0.8f, 0.8f, 0.8f, 1.0f );
     vec4	specular = vec4( 1.0f, 1.0f, 1.0f, 1.0f );
@@ -77,13 +77,13 @@ void update()
 	float t = float(glfwGetTime());
 	//float scale	= 1.0f+float(cos(t*1.5f))*0.05f;
 	float scale = 1.0f;
-	mat4 model_matrix = mat4::translate(vec3(30,0,0))*mat4::scale( scale, scale, scale );
+	mat4 model_matrix = mat4::scale( scale, scale, scale );
 
 	// update uniform variables in vertex/fragment shaders
 	GLint uloc;
 	uloc = glGetUniformLocation( program, "view_matrix" );			if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, cam.view_matrix );
 	uloc = glGetUniformLocation( program, "projection_matrix" );	if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, cam.projection_matrix );
-	uloc = glGetUniformLocation( program, "model_matrix" );			if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, model_matrix );
+	//uloc = glGetUniformLocation( program, "model_matrix" );			if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, model_matrix );
 
 	// setup light properties
 	glUniform4fv( glGetUniformLocation( program, "light_position" ), 1, light.position );

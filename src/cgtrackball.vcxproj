@@ -54,7 +54,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="gl\glad\glad.c" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="main2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cgmath.h" />
