@@ -30,6 +30,8 @@ uniform sampler2D NEPTUNE;
 uniform sampler2D URANUS;
 uniform sampler2D SATURN_RING;
 uniform sampler2D URANUS_RING;
+uniform sampler2D SATURN_RING_ALPHA;
+uniform sampler2D URANUS_RING_ALPHA;
 uniform int mode;
 
 vec4 phong( vec3 l, vec3 n, vec3 h, vec4 Kd )
@@ -82,26 +84,14 @@ void main()
 	}else if(mode==21){
 		iKd=texture(SATURN_RING,tc.yy);
 		fragColor=phong(l,n,h,iKd);
-		if(tc.y>=0.1){
-			fragColor.a=0.3;
-		}else{
-			fragColor.a=1;
-		}
-		
+		iKd=texture(SATURN_RING_ALPHA,tc.yy);
+		fragColor.a=iKd.y;
 		
 	}else if(mode==22){
 		iKd=texture(URANUS_RING,tc.yy);
 		fragColor=phong(l,n,h,iKd);
-		fragColor.a=0.5;
-	}else if(mode==100){
-		iKd=texture(SATURN_RING,tc);
-		fragColor=phong(l,n,h,iKd);
-		fragColor=texture(SATURN_RING,tc.xy,0.5);
-	
-	}else if(mode==101){
-		iKd=texture(URANUS_RING,tc);
-		fragColor=phong(l,n,h,iKd);
-		fragColor=texture(URANUS_RING,tc);
+		iKd=texture(URANUS_RING_ALPHA,tc.yy);
+		fragColor.a=iKd.y;
 	}else				
 		fragColor = phong(l,n,h,Kd);
 }

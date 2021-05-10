@@ -258,19 +258,21 @@ inline void sphere_t::update( float t)
 		model_matrix = model_matrix * mat4::scale(vec3(radius, radius, radius));
 		model_matrix = mat4::translate(vec3(radx(t * 2.5f, 1.6f, 0.0f), rady(t * 2.5f, 1.6f, 0.0f), 0)) * model_matrix;
 		break;
-	case 21:
-		radius = 1.7f;
+	case 21: // 토성으 ㅣ고리
+		radius = 2.0f;
 		rotation = 0.4f;
 		position_x = 17.0f;
 		position_y = -4.0f;
 		model_matrix = mat4::rotate(vec3(0, 0, 1), t * rotation) * mat4::translate(vec3(position_x, position_y, 0)) * mat4::scale(vec3(radius, radius, 0.01f));
+		//model_matrix = model_matrix * mat4::rotate(vec3(1, 0, 0), PI);
 		break;
-	case 22:
-		radius = 1.6f;
-		rotation = 0.35f;
-		position_x = 22.5f;
-		position_y = -9.0f;
+	case 22: // 천왕성 고리
+		radius = 2.4f;
+		rotation = -0.35f;
+		position_x = 19.5f;
+		position_y = 2.0f;
 		model_matrix = mat4::rotate(vec3(0, 0, 1), t * rotation) * mat4::translate(vec3(position_x, position_y, 0)) * mat4::scale(vec3(radius, radius, 0.01f));
+		
 		break;
 	}
 	//float c	= cos(theta), s=sin(theta);

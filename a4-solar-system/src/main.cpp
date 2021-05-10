@@ -17,13 +17,16 @@ static const char*	sun_texture = "../bin/textures/sun.jpg";
 static const char*	mercury_texture = "../bin/textures/mercury.jpg";
 static const char*	venus_texture = "../bin/textures/venus.jpg";
 static const char*	earth_texture = "../bin/textures/earth.jpg";
+static const char*	earth_normal = "../bin/textures/earth.jpg";
 static const char*	mars_texture = "../bin/textures/mars.jpg";
 static const char*	jupiter_texture = "../bin/textures/jupiter.jpg";
 static const char*	saturn_texture = "../bin/textures/saturn.jpg";
 static const char*	neptune_texture = "../bin/textures/neptune.jpg";
 static const char*	uranus_texture = "../bin/textures/uranus.jpg";
 static const char*	saturn_ring_texture = "../bin/textures/saturn-ring.jpg";
+static const char*	saturn_ring_alpha = "../bin/textures/saturn-ring-alpha.jpg";
 static const char*	uranus_ring_texture = "../bin/textures/uranus-ring.jpg";
+static const char*	uranus_ring_alpha = "../bin/textures/uranus-ring-alpha.jpg";
 uint				NUM_TESS = 72;
 uint				NUM_SPHERES = 23;
 uint				NUM_GORIES = 2;
@@ -64,6 +67,8 @@ GLuint	NEPTUNE;
 GLuint	URANUS;
 GLuint	SATURN_RING;
 GLuint	URANUS_RING;
+GLuint	SATURN_RING_ALPHA;
+GLuint	URANUS_RING_ALPHA;
 
 //*************************************
 // global variables
@@ -176,6 +181,14 @@ void update()
 	glActiveTexture(GL_TEXTURE10);
 	glBindTexture(GL_TEXTURE_2D, URANUS_RING);
 	glUniform1i(glGetUniformLocation(program, "URANUS_RING"), 10);
+
+	glActiveTexture(GL_TEXTURE11);
+	glBindTexture(GL_TEXTURE_2D, SATURN_RING_ALPHA);
+	glUniform1i(glGetUniformLocation(program, "SATURN_RING_ALPHA"), 11);
+
+	glActiveTexture(GL_TEXTURE12);
+	glBindTexture(GL_TEXTURE_2D, URANUS_RING_ALPHA);
+	glUniform1i(glGetUniformLocation(program, "URANUS_RING_ALPHA"), 12);
 	
 	
 }
@@ -205,7 +218,7 @@ void render()
 		glDrawElements(GL_TRIANGLES, NUM_TESS * (NUM_TESS) * 3 , GL_UNSIGNED_INT, nullptr);
 	}
 	glBindVertexArray(vertex_array_gori);
-	for (auto& g : gories) {
+	/*for (auto& g : gories) {
 		float delta_time = t - t0;
 		g.update(t);
 		theta += delta_time * 0.5f;
@@ -214,7 +227,7 @@ void render()
 		glUniform1i(glGetUniformLocation(program, "mode"), mode);
 		glUniformMatrix4fv(glGetUniformLocation(program, "model_matrix"), 1, GL_TRUE, g.model_matrix);
 		glDrawElements(GL_TRIANGLES, NUM_TESS * 3, GL_UNSIGNED_INT, nullptr);
-	}
+	}*/
 		// render vertices: trigger shader programs to process vertex data
 	
 
@@ -550,6 +563,8 @@ bool user_init()
 	
 	SATURN_RING = create_texture(saturn_ring_texture, true,GL_CLAMP_TO_EDGE); if (!SATURN_RING) return false;
 	URANUS_RING = create_texture(uranus_ring_texture, true,GL_REPEAT); if (!URANUS_RING) return false;
+	SATURN_RING_ALPHA = create_texture(saturn_ring_alpha, true, GL_CLAMP_TO_EDGE); if (!SATURN_RING_ALPHA) return false;
+	URANUS_RING_ALPHA = create_texture(uranus_ring_alpha, true, GL_REPEAT); if (!URANUS_RING_ALPHA) return false;
 	update_vertex_buffer_circle(gori, NUM_TESS);
 
 
